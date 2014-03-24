@@ -4,13 +4,14 @@ import cStringIO
 import sys
 import time
 import json
+import redis
 import urllib2
 
 # vendor
 from gevent import socket
 
 E_BADSINKPORT = 'bad sink port: %s\n(should be an integer)'
-E_BADSINKTYPE = 'bad sink type: %s\n(should be one of graphite|influxdb)'
+E_BADSINKTYPE = 'bad sink type: %s\n(should be one of graphite|influxdb|redis)'
 E_BADSTATUSCODE = 'bad status code: %d\n(expected 200)'
 E_SENDFAIL = 'failed to send stats to %s %s: %s'
 
@@ -146,6 +147,54 @@ class GraphiteSink(Sink):
         buf.close()
 
 
+class RedisSink(Sink):
+    """
+    Sends stats to one or more Redis servers.
+    """
+    _default_port = 6379
+    _default_db = 0
+
+    def __init__(self):
+        self._hosts = set()
+
+    def add(self, options):
+        if isinstance(options, tuple):
+            host = options[0] or self._default_host
+            port = options[1] or self._default_port
+            db = int(options[2]) if options[2].isdigit() else self._default_db
+        elif isinstance(options, dict):
+            host = options.get('host', self._default_host)
+            port = options.get('port', self._default_port)
+            db = int(options.get('db')) if 'db' in options else self._default_db
+        else:
+            raise Exception('bad sink config object type: %r' % options)
+        r = redis.Redis(host=host, port=port, db=db)
+        self._hosts.add(r)
+
+    def send(self, stats, now):
+        """Format stats and send to one or more Redis hosts"""
+        now = int(now)  # time precision = second
+
+        # Counters
+        for key, val in stats.counts.iteritems():
+
+            for host in self._hosts:
+                # flush stats to redis
+                try:
+                    host.hset(key, now, val)
+                except Exception, ex:
+                    self.error(E_SENDFAIL % ('redis', host, ex))
+
+        # Top-K elements
+        for key, val in stats.counts.iteritems():
+            for host in self._hosts:
+                # flush stats to redis
+                try:
+                    host.hset(key, now, val)
+                except Exception, ex:
+                    self.error(E_SENDFAIL % ('redis', host, ex))
+
+
 class InfluxDBSink(Sink):
 
     """
@@ -192,7 +241,7 @@ class InfluxDBSink(Sink):
                             "lower", "count"],
                 "points": [[now, v['mean'], v['upper'], v['max_at_thresh'],
                         v['lower'], v['count']]]
-                })
+            })
         # counter stats
         for key, val in stats.counts.iteritems():
             body.append({
@@ -241,7 +290,8 @@ class SinkManager(object):
     _sink_class_map = {
         'graphite': GraphiteSink,
         'influxdb': InfluxDBSink,
-        }
+        'redis': RedisSink
+    }
 
     def _parse_string(self, s):
         # parse the sink string config (coming from optparse)
@@ -258,7 +308,7 @@ class SinkManager(object):
             pass  # port and host are optional: keep default values
         except ValueError:
             raise ValueError(E_BADSINKPORT % port)
-        return (host, port, sink_type, sink_options)
+        return host, port, sink_type, sink_options
 
     def __init__(self, sinks):
         # construct the sink and add hosts to it

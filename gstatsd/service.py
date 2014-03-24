@@ -41,6 +41,8 @@ class Stats(object):
         self.timers = defaultdict(list)
         self.timers_stats = defaultdict(dict)
         self.counts = defaultdict(float)
+        self.sets = defaultdict(set)
+        self.sorted_sets = defaultdict(dict)
         self.gauges = defaultdict(float)
         self.proxies = defaultdict(list)
         self.interval = interval
@@ -232,6 +234,15 @@ class StatsDaemon(object):
                 elif stype == 'g':
                     value = float(value if value else 1)
                     stats.gauges[key] = value
+                # set
+                elif stype == 's':
+                    if value:
+                        stats.sets[key].add(value)
+                # sorted set
+                elif stype == 'z':
+                    if value:
+                        value += float(value)
+                        stats.sorted_sets[key] += value
                 # proxy
                 elif stype == 'p':
                     cfg = self._proxycfg_cache.get(key)

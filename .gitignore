@@ -3,3 +3,13 @@
 .coverage
 build
 
+# Virtualenv
+bin
+lib
+include
+dist
+
+# Hidden files
+.*
+
+

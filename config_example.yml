@@ -2,7 +2,7 @@ host: localhost
 port: 8125
 daemonize: false
 verbose: false
-flush: 5
+flush: 10
 prefix: 
 percent: 90
 
@@ -18,3 +18,8 @@ sinks:
   - host: localhost
     port: 2003
     type: graphite
+
+  - host: localhost
+    port: 6379
+    db: 0
+    type: redis

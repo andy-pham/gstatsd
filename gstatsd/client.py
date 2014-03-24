@@ -14,8 +14,9 @@ def _format_float(val):
 
 
 class StatsClient(object):
-
-    "Simple client to exercise the statsd server."
+    """
+    Simple client to exercise the statsd server.
+    """
 
     HOSTPORT = ('', 8125)
 
@@ -30,6 +31,12 @@ class StatsClient(object):
 
     def gauge(self, key, value, sample_rate=1):
         self._send('%s:%s|g' % (key, _format_float(value)), sample_rate)
+
+    def set(self, key, value):
+        self._send('%s:%s|s' % (key, value))
+
+    def sorted_set(self, key, value):
+        self._send('%s:%s|z' % (key, value))
 
     def proxy(self, key, value):
         self._send('%s:%s|p' % (key, value))

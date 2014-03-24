@@ -41,9 +41,7 @@ Options:
                             bind [host]:port (host defaults to '')
       -s SINK, --sink=SINK  a service to which stats are sent
                             ([[host:]port:]type[,backend options]). Supported
-                            types are "graphite" and "influxdb". InfluxDB backend
-                            needs database, user, and password options, for
-                            example: -s influxdb,mydb,myuser,mypass
+                            types are "graphite", "influxdb" and "redis"
       -v                    increase verbosity (currently used for debugging)
       -f INTERVAL, --flush=INTERVAL
                             flush interval, in seconds (default 10)

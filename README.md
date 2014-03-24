@@ -33,9 +33,7 @@ Options:
                             bind [host]:port (host defaults to '')
       -s SINK, --sink=SINK  a service to which stats are sent
                             ([[host:]port:]type[,backend options]). Supported
-                            types are "graphite" and "influxdb". InfluxDB backend
-                            needs database, user, and password options, for
-                            example: -s influxdb,mydb,myuser,mypass
+                            types are "graphite", "influxdb" and "redis"
       -v                    increase verbosity (currently used for debugging)
       -f INTERVAL, --flush=INTERVAL
                             flush interval, in seconds (default 10)
@@ -63,6 +61,10 @@ To send the stats to multiple graphite servers, specify '-s' multiple times:
 To send the stats influxdb server on its default port 8086 every 5 seconds:
 
     % gstatsd -s influxdb,mydb,myuser,mypass -f 5
+
+To send the stats redis server on its default port 6379 every 5 seconds:
+
+    % gstatsd -s redis,127.0.0.1,6379,0 -f 5
 
 To send the stats to both graphite and influxdb servers, specify '-s' multiple
 times:
@@ -92,6 +94,10 @@ where 'config_example.yml' could be:
       - host: localhost
         port: 2003
         type: graphite
+      - host: localhost
+        port: 6379
+        db: 0
+        type: redis
 
 
 Using the client

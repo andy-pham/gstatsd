@@ -1,4 +1,3 @@
-
 # standard
 import unittest
 
@@ -7,13 +6,12 @@ from gstatsd import service, config
 
 
 class StatsServiceTest(unittest.TestCase):
-
     def setUp(self):
         self.svc = service.StatsDaemon(
             config.StatsConfig({
                 'sinks': ['2003:graphite'],
                 'flush_interval': 5,
-                }),
+            }),
             False)
         self.stats = self.svc._stats
 
@@ -21,7 +19,7 @@ class StatsServiceTest(unittest.TestCase):
         svc = service.StatsDaemon(
             config.StatsConfig({
                 'sinks': ['2003:graphite'],
-                }),
+            }),
             False)
         stats = svc._stats
         self.assertEquals(svc._bindaddr, ('localhost', 8125))
@@ -38,7 +36,7 @@ class StatsServiceTest(unittest.TestCase):
                 'sinks': ['foo:2004:graphite'],
                 'flush_interval': 5,
                 'threshold': 80,
-                }),
+            }),
             True)
         stats = svc._stats
         self.assertEquals(svc._bindaddr, ('bar', 8125))
@@ -82,7 +80,7 @@ class StatsServiceTest(unittest.TestCase):
                 'sinks': ['2003:graphite'],
                 'flush_interval': 5,
                 'prefix': 'pfx',
-                }))
+            }))
         pkt = 'foo:1|c'
         svc._process(pkt)
         self.assertEquals(svc._stats.counts, {'pfx.foo': 1})

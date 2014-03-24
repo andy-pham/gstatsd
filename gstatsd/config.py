@@ -5,7 +5,6 @@ from gstatsd.core import __version__
 
 
 class ProxyConfig(object):
-
     def __init__(self, cfg, statscfg):
         self.name = cfg['name']
         self.regex = re.compile('^%s$' % self.name)
@@ -56,14 +55,13 @@ class StatsConfig(object):
             help="port to listen to (default %d)" % cls.port)
         parser.add_option(
             '-s', '--sink', dest='sinks', action='append', default=[],
-            help="a service to which stats are sent ([[host:]port:]type"
-            "[,backend options]). Supported types are \"graphite\" and "
-            "\"influxdb\".\nInfluxDB backend needs database, user, and "
-            "password options, for example:\n-s influxdb,mydb,myuser,mypass")
+            help='a service to which stats are sent ([[host:]port:]type'
+                 '[,backend options]). Supported types are "graphite", '
+                 '"influxdb" and "redis"')
         parser.add_option(
             '-f', '--flush-interval', dest='flush_interval',
             help="flush interval, in seconds (default %d)"
-            % cls.flush_interval)
+                 % cls.flush_interval)
         parser.add_option(
             '-x', '--prefix', dest='prefix',
             help="key prefix added to all keys (default %r)" % cls.prefix)
@@ -92,6 +90,7 @@ class StatsConfig(object):
 
     def parse_yml(self, path):
         import yaml
+
         with open(path, 'r') as f:
             self.parse_dict(yaml.load(f))
 
@@ -107,9 +106,10 @@ class StatsConfig(object):
 
     def dump_yml(self):
         import yaml
+
         d = {
             'sinks': self.sinks,
-            }
+        }
         for prop in self.props:
             d[prop] = getattr(self, prop)
         return yaml.dump(d)

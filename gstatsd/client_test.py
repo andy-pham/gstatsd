@@ -1,4 +1,3 @@
-
 # standard
 import unittest
 
@@ -7,7 +6,6 @@ from gstatsd import client
 
 
 class StatsDummyClient(client.StatsClient):
-
     def __init__(self, hostport=None):
         client.StatsClient.__init__(self, hostport)
         self.packets = []
@@ -17,7 +15,6 @@ class StatsDummyClient(client.StatsClient):
 
 
 class StatsClientTest(unittest.TestCase):
-
     def setUp(self):
         self._cli = StatsDummyClient()
 
@@ -63,7 +60,6 @@ class StatsClientTest(unittest.TestCase):
 
 
 class StatsTest(unittest.TestCase):
-
     def setUp(self):
         self._cli = StatsDummyClient()
         self._stat = client.Stats(self._cli)

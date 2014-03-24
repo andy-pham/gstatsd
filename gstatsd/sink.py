@@ -1,4 +1,3 @@
-
 # standard
 import cStringIO
 import sys
@@ -17,7 +16,6 @@ E_SENDFAIL = 'failed to send stats to %s %s: %s'
 
 
 class Sink(object):
-
     """
     A resource to which stats will be sent.
     """
@@ -47,11 +45,10 @@ class Sink(object):
             'max_at_thresh': max_at_thresh,
             'lower': vmin,
             'count': num,
-            }
+        }
 
 
 class GraphiteSink(Sink):
-
     """
     Sends stats to one or more Graphite servers.
     """
@@ -73,7 +70,9 @@ class GraphiteSink(Sink):
         self._hosts.add((host, port))
 
     def send(self, stats, now):
-        "Format stats and send to one or more Graphite hosts"
+        """
+        Format stats and send to one or more Graphite hosts
+        """
         buf = cStringIO.StringIO()
         num_stats = 0
         now = int(now)  # time precision = second
@@ -89,7 +88,7 @@ class GraphiteSink(Sink):
                 'key': 'stats.timers.%s' % key,
                 'now': now,
                 'percent': pct,
-                }
+            }
             values.update(stats.timers_stats[key])
             buf.write('%(key)s.mean %(mean)f %(now)d\n'
                       '%(key)s.upper %(upper)f %(now)d\n'
@@ -106,7 +105,7 @@ class GraphiteSink(Sink):
                           'count': val,
                           'count_interval': val / stats.interval,
                           'now': now
-                          })
+                      })
             num_stats += 1
 
         # gauges stats
@@ -115,7 +114,7 @@ class GraphiteSink(Sink):
                 'key': key,
                 'gauge': val,
                 'now': now
-                })
+            })
             num_stats += 1
 
         # proxies stats
@@ -125,13 +124,13 @@ class GraphiteSink(Sink):
                     'key': key,
                     'val': val,
                     't': int(t)
-                    })
+                })
             num_stats += len(vals)
 
         buf.write('statsd.numStats %(num_stats)d %(now)d\n' % {
             'num_stats': num_stats,
             'now': now
-            })
+        })
 
         # TODO: add support for N retries
 
@@ -185,8 +184,10 @@ class RedisSink(Sink):
                 except Exception, ex:
                     self.error(E_SENDFAIL % ('redis', host, ex))
 
-        # Top-K elements
-        for key, val in stats.counts.iteritems():
+        # Sets
+
+        # Sorted Sets
+        for key, val in stats.sorted_sets.iteritems():
             for host in self._hosts:
                 # flush stats to redis
                 try:
@@ -196,7 +197,6 @@ class RedisSink(Sink):
 
 
 class InfluxDBSink(Sink):
-
     """
     Sends stats to one or more InfluxDB servers.
     """
@@ -240,7 +240,7 @@ class InfluxDBSink(Sink):
                 "columns": ["time", "mean", "upper", "upper_%d" % pct,
                             "lower", "count"],
                 "points": [[now, v['mean'], v['upper'], v['max_at_thresh'],
-                        v['lower'], v['count']]]
+                            v['lower'], v['count']]]
             })
         # counter stats
         for key, val in stats.counts.iteritems():
@@ -248,21 +248,21 @@ class InfluxDBSink(Sink):
                 "name": "stats.%s.count" % key,
                 "columns": ["time", "value", "count_interval"],
                 "points": [[now, val, val / stats.interval]]
-                })
+            })
         # gauges stats
         for key, val in stats.gauges.iteritems():
             body.append({
                 "name": "stats.%s.gauge" % key,
                 "columns": ["time", "value"],
                 "points": [[now, val]]
-                })
+            })
         # proxy values stats
         for key, vals in stats.proxies.iteritems():
             body.append({
                 "name": "stats.%s.proxy" % key,
                 "columns": ["time", "value"],
                 "points": [[int(t * 1000), val] for t, val in vals]
-                })
+            })
 
         if not body:
             return
@@ -280,7 +280,6 @@ class InfluxDBSink(Sink):
 
 
 class SinkManager(object):
-
     """
     A manager of sinks to which stats will be sent.
     """

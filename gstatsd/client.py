@@ -1,5 +1,3 @@
-
-
 # standard
 import random
 import socket
@@ -65,7 +63,6 @@ class StatsClient(object):
 
 
 class StatsCounter(object):
-
     def __init__(self, client, key, sample_rate=1):
         self._client = client
         self._key = key
@@ -82,7 +79,6 @@ class StatsCounter(object):
 
 
 class StatsTimer(object):
-
     def __init__(self, client, key):
         self._client = client
         self._key = key
@@ -103,7 +99,6 @@ class StatsTimer(object):
 
 
 class StatsGauge(object):
-
     def __init__(self, client, key, sample_rate=1):
         self._client = client
         self._key = key
@@ -114,7 +109,6 @@ class StatsGauge(object):
 
 
 class StatsProxy(object):
-
     def __init__(self, client, key):
         self._client = client
         self._key = key
@@ -124,7 +118,6 @@ class StatsProxy(object):
 
 
 class Stats(object):
-
     def __init__(self, client):
         self._client = client
 

@@ -195,11 +195,15 @@ class StatsDaemon(object):
                 self.error(str(ex))
 
     def _shutdown(self):
-        "Shutdown the server"
+        """
+        Shutdown the server
+        """
         self.exit("service exiting", code=0)
 
     def _process(self, data, now):
-        "Process a single packet and update the internal tables."
+        """
+        Process a single packet and update the internal tables.
+        """
         parts = data.split(':')
         if self._debug:
             self.error('packet: %r' % data)
